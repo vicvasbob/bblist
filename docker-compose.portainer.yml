@@ -47,15 +47,17 @@ services:
           echo 'Repository already exists, pulling latest changes...'
           git pull origin master || echo 'Pull failed, continuing with existing code'
         fi &&
-        echo 'Installing npm packages...' &&
-        npm ci --only=production &&
+        echo 'Installing ALL npm packages (including dev for build)...' &&
+        npm ci &&
         echo 'Generating Prisma client...' &&
         npx prisma generate &&
         echo 'Running database migrations...' &&
         npx prisma migrate deploy &&
         echo 'Building application...' &&
         npm run build &&
-        echo 'Starting application...' &&
+        echo 'Removing dev dependencies to save space...' &&
+        npm prune --production &&
+        echo 'Starting production server...' &&
         npm start
       "
 
