@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: babylist-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-babylist}
+      POSTGRES_USER: ${POSTGRES_USER:-babyuser}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-babypass}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-babyuser}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  app:
+    build:
+      context: https://github.com/vicvasbob/bblist.git
+      dockerfile: Dockerfile.production
+    container_name: babylist-app
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql://babyuser:babypass@postgres:5432/babylist}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3000}
+      GOOGLE_GEMINI_API_KEY: ${GOOGLE_GEMINI_API_KEY:-}
+      NODE_ENV: production
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    command: sh -c "npx prisma migrate deploy && npm start"
+
+volumes:
+  postgres_data:
+    driver: local
+  app_cache:
+    driver: local
+
+networks:
+  default:
+    driver: bridge
