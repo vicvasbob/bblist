@@ -1,36 +1,146 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🍼 Baby List - Lista de Regalos para Bebé
 
-## Getting Started
+Sistema completo de gestión de listas de regalos para bebés con autenticación, administración de usuarios y productos, e internacionalización.
 
-First, run the development server:
+## 🚀 Características
 
+- ✅ **Gestión de usuarios** completa (crear, activar, desactivar, eliminar)
+- ✅ **Sistema de productos** con reservas
+- ✅ **Autenticación JWT** con roles de admin
+- ✅ **Interfaz de administración** completa
+- ✅ **Sistema i18n** con editor de traducciones
+- ✅ **Base de datos PostgreSQL** con Prisma ORM
+- ✅ **Docker** para desarrollo y despliegue
+
+## 📋 Requisitos Previos
+
+- Docker y Docker Compose
+- Git (para desarrollo local)
+- Node.js 20+ (para desarrollo local)
+
+## 🐳 Despliegue con Docker (Recomendado)
+
+### Opción 1: Desarrollo
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# Clonar el repositorio
+git clone https://github.com/vicvasbob/bblist.git
+cd bblist
+
+# Iniciar los servicios
+docker-compose up -d
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Opción 2: Producción (desde GitHub)
+```bash
+# Descargar solo el docker-compose de producción
+curl -o docker-compose.yml https://raw.githubusercontent.com/vicvasbob/bblist/master/docker-compose.production.yml
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+# Iniciar los servicios (esto clonará automáticamente desde GitHub)
+docker-compose up -d
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Opción 3: Solo el Dockerfile
+```bash
+# Construir desde GitHub directamente
+docker build -t baby-list https://github.com/vicvasbob/bblist.git
 
-## Learn More
+# Ejecutar (necesitarás una base de datos PostgreSQL)
+docker run -p 3000:3000 \
+  -e DATABASE_URL="postgresql://user:pass@host:5432/db" \
+  baby-list
+```
 
-To learn more about Next.js, take a look at the following resources:
+## 🛠️ Desarrollo Local
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+# Clonar el repositorio
+git clone https://github.com/vicvasbob/bblist.git
+cd bblist
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# Instalar dependencias
+npm install
 
-## Deploy on Vercel
+# Configurar variables de entorno
+cp .env.example .env.local
+# Editar .env.local con tus configuraciones
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+# Iniciar base de datos
+docker-compose up postgres -d
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# Ejecutar migraciones
+npx prisma migrate dev
+
+# Iniciar servidor de desarrollo
+npm run dev
+```
+
+## 🌍 Variables de Entorno
+
+```env
+DATABASE_URL=postgresql://babyuser:babypass@localhost:5432/babylist
+NEXT_PUBLIC_API_URL=http://localhost:3000
+GOOGLE_GEMINI_API_KEY=your_api_key_here
+```
+
+## 📖 Uso
+
+1. **Acceder a la aplicación**: http://localhost:3000
+2. **Página de productos**: http://localhost:3000/products
+3. **Admin de usuarios**: http://localhost:3000/admin/users
+4. **Admin de productos**: http://localhost:3000/admin/products
+5. **Editor de textos**: http://localhost:3000/admin/settings
+
+## 🔧 Tecnologías
+
+- **Frontend**: Next.js 15, React, TypeScript, Tailwind CSS
+- **Backend**: Next.js API Routes, Prisma ORM
+- **Base de datos**: PostgreSQL
+- **Autenticación**: JWT personalizado
+- **Estado**: Zustand
+- **Containerización**: Docker & Docker Compose
+- **Internacionalización**: Sistema i18n personalizado
+
+## 📁 Estructura del Proyecto
+
+```
+├── src/
+│   ├── app/                 # Next.js App Router
+│   │   ├── admin/          # Páginas de administración
+│   │   ├── api/            # API Routes
+│   │   └── products/       # Página pública de productos
+│   ├── components/         # Componentes React
+│   ├── lib/               # Utilidades y configuración
+│   ├── locales/           # Archivos de traducción
+│   └── store/             # Estado global
+├── prisma/                # Schema y migraciones
+├── docker-compose.yml     # Desarrollo
+├── docker-compose.production.yml  # Producción
+└── Dockerfile            # Imagen de contenedor
+```
+
+## 🚀 Despliegue en Producción
+
+El proyecto está configurado para desplegarse fácilmente en:
+
+- **Vercel** (recomendado para Next.js)
+- **Docker** en cualquier VPS
+- **Railway**, **Render**, etc.
+
+### Vercel
+1. Conecta tu repositorio de GitHub con Vercel
+2. Configura las variables de entorno
+3. Despliega automáticamente
+
+### Docker VPS
+```bash
+# En tu servidor
+docker-compose -f docker-compose.production.yml up -d
+```
+
+## 📝 Licencia
+
+MIT License
+
+## 👨‍💻 Autor
+
+Victor Albasole (vicvasbob)
