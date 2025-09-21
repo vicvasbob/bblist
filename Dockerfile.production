@@ -22,23 +22,27 @@ ENV NEXT_PRIVATE_TURBOPACK=0
 ENV NODE_ENV=production
 RUN npm run build
 
-# Stage 3: Runner - Imagen de producción
+# Stage final: Runtime
 FROM node:20-alpine AS runner
 WORKDIR /app
+
+# Instalar dependencias del sistema para Prisma
+RUN apk add --no-cache openssl
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# Copiar archivos necesarios desde el builder
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/src/locales ./src/locales
+
 # Crear usuario no-root para seguridad
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
-
-# Copiar archivos necesarios desde el builder
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
-COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/src/locales ./src/locales
 
 # Cambiar al usuario no-root
 USER nextjs
@@ -49,4 +53,5 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["node", "server.js"]
+# Comando por defecto que incluye migración y start
+CMD ["sh", "-c", "npx prisma migrate deploy && npm start"]
