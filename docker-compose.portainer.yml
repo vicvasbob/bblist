@@ -12,7 +12,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-babyuser}"]
+      test: ["CMD-SHELL", "pg_isready -U babyuser -d babylist"]
       interval: 30s
       timeout: 10s
       retries: 5
