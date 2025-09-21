@@ -22,49 +22,32 @@ services:
   app:
     image: node:20-alpine
     container_name: babylist-app
-    working_dir: /app
+    working_dir: /tmp/build
     environment:
       DATABASE_URL: ${DATABASE_URL:-postgresql://babyuser:babypass@postgres:5432/babylist}
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3000}
       GOOGLE_GEMINI_API_KEY: ${GOOGLE_GEMINI_API_KEY:-}
       NODE_ENV: production
-      REPO_URL: https://github.com/vicvasbob/bblist.git
     ports:
       - "3000:3000"
     depends_on:
       postgres:
         condition: service_healthy
     restart: unless-stopped
-    volumes:
-      - app_data:/app
-    command: >
+    command: |
       sh -c "
-        echo 'Installing dependencies...' &&
         apk add --no-cache git openssh openssl &&
-        echo 'Cloning repository...' &&
-        if [ ! -f package.json ]; then
-          git clone $$REPO_URL . &&
-          echo 'Repository cloned successfully'
-        else
-          echo 'Repository already exists, pulling latest changes...'
-          git pull origin master || echo 'Pull failed, continuing with existing code'
-        fi &&
-        echo 'Installing npm packages...' &&
-        npm ci --only=production &&
-        echo 'Generating Prisma client...' &&
+        git clone https://github.com/vicvasbob/bblist.git /app &&
+        cd /app &&
+        npm ci &&
         npx prisma generate &&
-        echo 'Running database migrations...' &&
         npx prisma migrate deploy &&
-        echo 'Building application...' &&
         npm run build &&
-        echo 'Starting application...' &&
         npm start
       "
 
 volumes:
   postgres_data:
-    driver: local
-  app_data:
     driver: local
 
 networks:

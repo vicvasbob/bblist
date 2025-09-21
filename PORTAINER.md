@@ -1,14 +1,14 @@
 # 🐳 Despliegue en Portainer
 
-## Opción 1: Stack desde Repositorio (Recomendado)
+## ⚠️ Problema con Git en Portainer
+
+Si ves el error `git: executable file not found in $PATH`, es porque Portainer no tiene git instalado en su entorno de build. Usa estas alternativas:
+
+## Opción 1: Stack Simple (Recomendado para Portainer)
 
 1. **Crear nuevo Stack** en Portainer
-2. **Seleccionar "Repository"**
-3. **Configurar repositorio:**
-   - URL: `https://github.com/vicvasbob/bblist.git`
-   - Reference: `refs/heads/master`
-   - Compose file path: `docker-compose.portainer.yml`
-
+2. **Seleccionar "Web editor"**
+3. **Copiar contenido** de `docker-compose.simple.yml`
 4. **Variables de entorno** (opcionales):
    ```
    POSTGRES_DB=babylist
@@ -17,16 +17,25 @@
    NEXT_PUBLIC_API_URL=http://localhost:3000
    GOOGLE_GEMINI_API_KEY=tu_api_key_aqui
    ```
-
 5. **Deploy Stack**
 
-## Opción 2: Stack desde Web Editor
+## Opción 2: Stack con Persistencia
 
-1. **Crear nuevo Stack** en Portainer
+1. **Crear nuevo Stack** en Portainer  
 2. **Seleccionar "Web editor"**
 3. **Copiar contenido** de `docker-compose.portainer.yml`
 4. **Configurar variables** si es necesario
 5. **Deploy Stack**
+
+## Opción 3: Stack desde Repositorio (Solo si Portainer tiene Git)
+
+1. **Crear nuevo Stack** en Portainer
+2. **Seleccionar "Repository"**
+3. **Configurar repositorio:**
+   - URL: `https://github.com/vicvasbob/bblist.git`
+   - Reference: `refs/heads/master`
+   - Compose file path: `docker-compose.simple.yml`
+4. **Deploy Stack**
 
 ## 🔧 Configuración
 
