@@ -38,7 +38,7 @@ services:
     networks:
       - baby-list-network
     restart: unless-stopped
-    # Comando definido en el Dockerfile.production
+    command: sh -c "npx prisma migrate deploy && npm start"
 
 volumes:
   db_data:

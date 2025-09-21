@@ -54,4 +54,8 @@ ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
 # Comando por defecto que incluye migración y start
-CMD ["sh", "-c", "npx prisma migrate deploy && npm start"]
+# Exponer el puerto
+EXPOSE 3000
+
+# Comando por defecto (se puede sobrescribir en docker-compose)
+CMD ["npm", "start"]
