@@ -1,0 +1,45 @@
+{
+  "home": {
+    "title": "Benvinguts a la llista de regals per la Joana!",
+    "description": "Ajuda'ns a prepararnos per la petita reservan regals que t'agradaria portar"
+  },
+  "button": {
+    "submit": "Submit",
+    "cancel": "Cancel"
+  },
+  "login": {
+    "title": "Benvinguts a la llista de regals per la Joana!",
+    "description": "Susplau entra les teves credencials per a poder accedir",
+    "email_label": "Adreça email",
+    "email_placeholder": "Entra la teva adreça email",
+    "password_label": "La teva contrasenya",
+    "password_placeholder": "Entra la teva contrasenya",
+    "button": "🎁 Uneix-te a la llista de regals!",
+    "button_login": "Unint-te a la llista...",
+    "ask": "* Demana les credencials al Víctor o la Laura per a poder accedir",
+    "error": "Les credencials són incorrectes"
+  },
+  "welcome": {
+    "text": "Benvinguts a la llista de regals per la Joana!",
+    "button": "Veure la llista"
+  },
+  "header": {
+    "title": "Joana - Llista de regals"
+  },
+  "products": {
+    "reserved": "Reservat",
+    "you_reserved": "Reservat per tu",
+    "reserved_large": "Algú portará aquest regal",
+    "you_reserved_large": "Molt bé! Tu portaras aquest regal",
+    "select": "Jo comparé aquest regal",
+    "total_description": " regals a la llista",
+    "view": "Mira el detall del regal"
+  },
+  "seo": {
+    "title": "Llista de regals per la Joana",
+    "description": "Web per a veure la llista de regals i reservar el que t'agradi més"
+  },
+  "auth": {
+    "logout": "Tancar sessió"
+  }
+}
