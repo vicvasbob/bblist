@@ -1,19 +1,22 @@
 version: '3.8'
+
 services:
   postgres:
-    image: postgres:15
+    image: postgres:15-alpine
     restart: always
     environment:
-      POSTGRES_DB: babylist
-      POSTGRES_USER: babyuser
-      POSTGRES_PASSWORD: babypass
+      POSTGRES_DB: ${POSTGRES_DB:-babylist}
+      POSTGRES_USER: ${POSTGRES_USER:-babyuser}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-babypass}
     ports:
       - "5432:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
+    networks:
+      - baby-list-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U babyuser -d babylist"]
-      interval: 5s
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-babyuser} -d ${POSTGRES_DB:-babylist}"]
+      interval: 10s
       timeout: 5s
       retries: 10
 
@@ -21,17 +24,26 @@ services:
     build:
       context: https://github.com/vicvasbob/bblist.git
       dockerfile: Dockerfile.production
+    container_name: baby-list-app
     depends_on:
       postgres:
         condition: service_healthy
     environment:
-      - DATABASE_URL=postgresql://babyuser:babypass@postgres:5432/babylist
-      - NEXT_PUBLIC_API_URL=http://localhost:3000
-      - NODE_ENV=production
+      - DATABASE_URL=${DATABASE_URL:-postgresql://babyuser:babypass@postgres:5432/babylist}
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:3000}
+      - NODE_ENV=${NODE_ENV:-production}
+      - NEXT_TELEMETRY_DISABLED=${NEXT_TELEMETRY_DISABLED:-1}
     ports:
       - "3000:3000"
-    restart: always
-    command: sh -c "npx prisma migrate deploy && node server.js"
+    networks:
+      - baby-list-network
+    restart: unless-stopped
+    command: sh -c "npx prisma migrate deploy && npm start"
 
 volumes:
   db_data:
+    driver: local
+
+networks:
+  baby-list-network:
+    driver: bridge
