@@ -1,8 +1,6 @@
 # 🐳 Despliegue en Portainer
 
-## 🎯 **Opción 1: Con Dockerfile (Recomendado)**
-
-### Archivo: `docker-compose.server.yml`
+## 🎯 **Método 1: Desde Repositorio (Recomendado)**
 
 1. **Crear nuevo Stack** en Portainer
 2. **Seleccionar "Repository"**
@@ -12,33 +10,42 @@
    - Compose file path: `docker-compose.server.yml`
 4. **Variables de entorno** (opcionales):
    ```
-   POSTGRES_DB=babylist
-   POSTGRES_USER=babyuser  
-   POSTGRES_PASSWORD=babypass
+   POSTGRES_PASSWORD=tu_contraseña_segura
    NEXT_PUBLIC_API_URL=http://localhost:3000
    GOOGLE_GEMINI_API_KEY=tu_api_key_aqui
    ```
 5. **Deploy Stack**
 
-### Ventajas:
-- ✅ **Build optimizado** con multi-stage
-- ✅ **Imagen final ligera** (solo archivos necesarios)
-- ✅ **Seguridad mejorada** (usuario no-root)
-- ✅ **Inicio rápido** (todo pre-compilado)
-
-## 🔄 **Opción 2: Fallback (Si falla la primera)**
-
-### Archivo: `docker-compose.fallback.yml`
+## 🔄 **Método 2: Web Editor (Fallback)**
 
 1. **Crear nuevo Stack** en Portainer
 2. **Seleccionar "Web editor"**
-3. **Copiar contenido completo** de `docker-compose.fallback.yml`
-4. **Deploy Stack**
+3. **Copiar contenido** de `docker-compose.server.yml` desde GitHub
+4. **Pegar** en el editor
+5. **Configurar variables** si es necesario
+6. **Deploy Stack**
 
-### Cuándo usar:
-- ❌ Si Portainer no puede hacer build desde GitHub
-- ❌ Si hay problemas con el contexto de build
-- ✅ Como respaldo garantizado
+## � **Si hay problemas con build desde GitHub:**
+
+Usar `docker-compose.fallback.yml` que funciona con runtime clone:
+
+1. **Web editor** en Portainer
+2. **Copiar contenido** de `docker-compose.fallback.yml`
+3. **Deploy Stack**
+
+## ⚙️ **Variables por defecto incluidas:**
+
+- `POSTGRES_DB=babylist`
+- `POSTGRES_USER=babyuser`
+- `POSTGRES_PASSWORD=babypass` ⚠️ **Cambiar por una segura**
+- `DATABASE_URL` se genera automáticamente
+- `NEXT_PUBLIC_API_URL=http://localhost:3000`
+- `NODE_ENV=production`
+
+## 🌐 **Acceso tras despliegue:**
+
+- **Aplicación**: http://localhost:3000 (o tu dominio)
+- **PostgreSQL**: Solo acceso interno (seguro)
 
 ## 🔧 Configuración
 
