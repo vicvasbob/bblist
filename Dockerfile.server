@@ -1,56 +1,46 @@
-# Multi-stage build para optimizar imagen final
+# ---------- Base ----------
 FROM node:20-alpine AS base
-
-# Instalar dependencias del sistema
-RUN apk add --no-cache git openssh openssl
-
-# Establecer directorio de trabajo
 WORKDIR /app
+RUN apk add --no-cache git openssh openssl libc6-compat
 
-# Clonar el repositorio
-RUN git clone https://github.com/vicvasbob/bblist.git .
-
-# Stage: Builder - Instalar deps y construir
+# ---------- Builder ----------
 FROM base AS builder
 
-# Instalar todas las dependencias (incluyendo dev)
+# Cache de dependencias
+COPY package*.json ./
 RUN npm ci
 
-# Generar cliente Prisma
-RUN npx prisma generate
+# Resto del código
+COPY . .
 
-# Construir la aplicación
+# Prisma y build (Tailwind/PostCSS corre aquí)
+RUN npx prisma generate
 RUN npm run build
 
-# Stage: Runner - Imagen final optimizada
+# ---------- Runner ----------
 FROM node:20-alpine AS runner
-
-# Instalar solo OpenSSL para Prisma
-RUN apk add --no-cache openssl
-
-# Crear usuario no-root para seguridad
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
-
-# Establecer directorio de trabajo
 WORKDIR /app
+RUN apk add --no-cache openssl libc6-compat
 
-# Copiar archivos necesarios desde builder
+# Usuario no root
+RUN addgroup --system --gid 1001 nodejs \
+ && adduser  --system --uid 1001 nextjs
+
+# Manifests para instalar solo prod deps
 COPY --from=builder /app/package*.json ./
+RUN npm ci --omit=dev
+
+# Artefactos de runtime
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/src/locales ./src/locales
 
-# Cambiar propietario de archivos
-RUN chown -R nextjs:nodejs /app
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
 
-# Usar usuario no-root
+RUN chown -R nextjs:nodejs /app
 USER nextjs
 
-# Exponer puerto
 EXPOSE 3000
-
-# Comando para ejecutar migraciones y iniciar app
 CMD ["sh", "-c", "npx prisma migrate deploy && npm start"]
