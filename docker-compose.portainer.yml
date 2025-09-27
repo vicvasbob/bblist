@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: babylist-postgres-dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: babylist
+      POSTGRES_USER: babyuser
+      POSTGRES_PASSWORD: babypass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U babyuser -d babylist"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  app:
+    build: .
+    container_name: babylist-app-dev
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql://babyuser:babypass@postgres:5432/babylist}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://TU-DOMINIO}
+      GOOGLE_GEMINI_API_KEY: ${GOOGLE_GEMINI_API_KEY:-}
+      NODE_ENV: production
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    command: sh -c "npx prisma migrate dev --name dev && npm run dev"
+
+volumes:
+  postgres_data:
+    driver: local
