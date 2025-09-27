@@ -34,25 +34,24 @@ services:
     restart: unless-stopped
     command: |
       sh -c "
-        echo 'Installing system dependencies...' &&
         apk add --no-cache git openssh openssl &&
-        echo 'Preparing app directory...' &&
-        rm -rf /app &&
-        mkdir -p /app &&
-        echo 'Cloning repository...' &&
-        git clone https://github.com/vicvasbob/bblist.git /app &&
+        if [ ! -f /app/package.json ]; then
+          echo 'Cloning repository...' &&
+          git clone https://github.com/vicvasbob/bblist.git /app
+        else
+          echo 'Repository already exists, pulling latest changes...' &&
+          cd /app &&
+          git pull origin master || echo 'Pull failed, using existing code'
+        fi &&
         cd /app &&
         echo 'Installing ALL npm dependencies (including dev for build)...' &&
-        npm ci &&
-        echo 'Generating Prisma client...' &&
+        npm install ||
+        (echo 'npm install failed, trying npm ci...' && npm ci) ||
+        (echo 'Both install methods failed, removing lock and installing...' && 
+         rm -f package-lock.json && npm install) &&
         npx prisma generate &&
-        echo 'Running database migrations...' &&
         npx prisma migrate deploy &&
-        echo 'Building Next.js application...' &&
         npm run build &&
-        echo 'Removing dev dependencies to save space...' &&
-        npm prune --production &&
-        echo 'Starting production server...' &&
         npm start
       "
 
