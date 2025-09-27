@@ -35,20 +35,21 @@ services:
     command: |
       sh -c "
         apk add --no-cache git openssh openssl &&
-        if [ ! -f /app/package.json ]; then
-          echo 'Cloning repository...' &&
-          git clone https://github.com/vicvasbob/bblist.git /app
-        else
-          echo 'Repository already exists, pulling latest changes...' &&
-          cd /app &&
-          git pull origin master || echo 'Pull failed, using existing code'
-        fi &&
+        echo 'Preparing app directory...' &&
+        rm -rf /app &&
+        mkdir -p /app &&
+        echo 'Cloning repository fresh...' &&
+        git clone https://github.com/vicvasbob/bblist.git /app &&
         cd /app &&
         echo 'Installing ALL npm dependencies (including dev for build)...' &&
+        echo 'Current package.json dependencies:' &&
+        cat package.json | grep -A 20 '"dependencies"' &&
         npm install ||
         (echo 'npm install failed, trying npm ci...' && npm ci) ||
         (echo 'Both install methods failed, removing lock and installing...' && 
          rm -f package-lock.json && npm install) &&
+        echo 'Verifying TailwindCSS installation:' &&
+        npm list tailwindcss || echo 'TailwindCSS not found!' &&
         npx prisma generate &&
         npx prisma migrate deploy &&
         npm run build &&
