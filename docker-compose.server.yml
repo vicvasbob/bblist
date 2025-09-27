@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   postgres:
@@ -9,23 +9,26 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-babylist}
       POSTGRES_USER: ${POSTGRES_USER:-babyuser}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-babypass}
+      # TZ: Europe/Madrid   # (opcional)
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U babyuser -d babylist"]
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 30s
       timeout: 10s
       retries: 5
 
   app:
+    # Portainer (Stacks) puede construir si subes el Dockerfile en el repo
     build:
-      context: https://github.com/vicvasbob/bblist.git
+      context: .
       dockerfile: Dockerfile.server
+    image: babylist-app:latest   # queda con esta etiqueta local tras el build
     container_name: babylist-app
     restart: unless-stopped
     environment:
       DATABASE_URL: ${DATABASE_URL:-postgresql://babyuser:babypass@postgres:5432/babylist}
-      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3000}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://TU-DOMINIO}
       GOOGLE_GEMINI_API_KEY: ${GOOGLE_GEMINI_API_KEY:-}
       NODE_ENV: production
     ports:

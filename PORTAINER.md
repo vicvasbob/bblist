@@ -1,29 +1,32 @@
 # 🐳 Despliegue en Portainer
 
-## 🎯 **Método 1: Desde Repositorio (Recomendado)**
+## 🎯 **Método Principal: Web Editor (Siempre funciona)**
+
+**⚠️ Usar este método si obtienes errores de git o TLS**
+
+**Archivo recomendado:** `docker-compose.fallback.yml`
 
 1. **Crear nuevo Stack** en Portainer
-2. **Seleccionar "Repository"**
-3. **Configurar repositorio:**
-   - URL: `https://github.com/vicvasbob/bblist.git`
-   - Reference: `refs/heads/master`
-   - Compose file path: `docker-compose.server.yml`
-4. **Variables de entorno** (opcionales):
+2. **Seleccionar "Web editor"**
+3. **Copiar contenido completo** de `docker-compose.fallback.yml` desde GitHub
+4. **Pegar** en el editor de Portainer
+5. **Variables de entorno** (opcionales):
    ```
    POSTGRES_PASSWORD=tu_contraseña_segura
    NEXT_PUBLIC_API_URL=http://localhost:3000
    GOOGLE_GEMINI_API_KEY=tu_api_key_aqui
    ```
-5. **Deploy Stack**
-
-## 🔄 **Método 2: Web Editor (Fallback)**
-
-1. **Crear nuevo Stack** en Portainer
-2. **Seleccionar "Web editor"**
-3. **Copiar contenido** de `docker-compose.server.yml` desde GitHub
-4. **Pegar** en el editor
-5. **Configurar variables** si es necesario
 6. **Deploy Stack**
+
+### ✅ **Por qué este método siempre funciona:**
+- No requiere `git` en Portainer
+- No requiere acceso directo a GitHub desde Portainer  
+- El contenedor clona el repo internamente
+- Compatible con cualquier instalación de Portainer
+
+## 🔄 **Método Alternativo: Desde Repositorio**
+
+**⚠️ Solo si tu Portainer NO tiene los errores de git**
 
 ## � **Si hay problemas con build desde GitHub:**
 
