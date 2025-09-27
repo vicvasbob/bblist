@@ -1,0 +1,56 @@
+# Multi-stage build para optimizar imagen final
+FROM node:20-alpine AS base
+
+# Instalar dependencias del sistema
+RUN apk add --no-cache git openssh openssl
+
+# Establecer directorio de trabajo
+WORKDIR /app
+
+# Clonar el repositorio
+RUN git clone https://github.com/vicvasbob/bblist.git .
+
+# Stage: Builder - Instalar deps y construir
+FROM base AS builder
+
+# Instalar todas las dependencias (incluyendo dev)
+RUN npm ci
+
+# Generar cliente Prisma
+RUN npx prisma generate
+
+# Construir la aplicación
+RUN npm run build
+
+# Stage: Runner - Imagen final optimizada
+FROM node:20-alpine AS runner
+
+# Instalar solo OpenSSL para Prisma
+RUN apk add --no-cache openssl
+
+# Crear usuario no-root para seguridad
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+# Establecer directorio de trabajo
+WORKDIR /app
+
+# Copiar archivos necesarios desde builder
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/src/locales ./src/locales
+
+# Cambiar propietario de archivos
+RUN chown -R nextjs:nodejs /app
+
+# Usar usuario no-root
+USER nextjs
+
+# Exponer puerto
+EXPOSE 3000
+
+# Comando para ejecutar migraciones y iniciar app
+CMD ["sh", "-c", "npx prisma migrate deploy && npm start"]

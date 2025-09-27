@@ -1,14 +1,15 @@
 # 🐳 Despliegue en Portainer
 
-## 📋 Archivo a usar: `docker-compose.server.yml`
+## 🎯 **Opción 1: Con Dockerfile (Recomendado)**
 
-Este archivo está optimizado específicamente para servidores y Portainer, con todas las dependencias auto-contenidas.
-
-## Opción 1: Stack desde Web Editor (Recomendado)
+### Archivo: `docker-compose.server.yml`
 
 1. **Crear nuevo Stack** en Portainer
-2. **Seleccionar "Web editor"**
-3. **Copiar contenido completo** de `docker-compose.server.yml`
+2. **Seleccionar "Repository"**
+3. **Configurar repositorio:**
+   - URL: `https://github.com/vicvasbob/bblist.git`
+   - Reference: `refs/heads/master`
+   - Compose file path: `docker-compose.server.yml`
 4. **Variables de entorno** (opcionales):
    ```
    POSTGRES_DB=babylist
@@ -19,15 +20,25 @@ Este archivo está optimizado específicamente para servidores y Portainer, con 
    ```
 5. **Deploy Stack**
 
-## Opción 2: Stack desde Repositorio
+### Ventajas:
+- ✅ **Build optimizado** con multi-stage
+- ✅ **Imagen final ligera** (solo archivos necesarios)
+- ✅ **Seguridad mejorada** (usuario no-root)
+- ✅ **Inicio rápido** (todo pre-compilado)
+
+## 🔄 **Opción 2: Fallback (Si falla la primera)**
+
+### Archivo: `docker-compose.fallback.yml`
 
 1. **Crear nuevo Stack** en Portainer
-2. **Seleccionar "Repository"**
-3. **Configurar repositorio:**
-   - URL: `https://github.com/vicvasbob/bblist.git`
-   - Reference: `refs/heads/master`
-   - Compose file path: `docker-compose.server.yml`
+2. **Seleccionar "Web editor"**
+3. **Copiar contenido completo** de `docker-compose.fallback.yml`
 4. **Deploy Stack**
+
+### Cuándo usar:
+- ❌ Si Portainer no puede hacer build desde GitHub
+- ❌ Si hay problemas con el contexto de build
+- ✅ Como respaldo garantizado
 
 ## 🔧 Configuración
 

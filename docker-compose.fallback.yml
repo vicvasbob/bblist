@@ -18,9 +18,7 @@ services:
       retries: 5
 
   app:
-    build:
-      context: https://github.com/vicvasbob/bblist.git
-      dockerfile: Dockerfile.server
+    image: node:20-alpine
     container_name: babylist-app
     restart: unless-stopped
     environment:
@@ -33,6 +31,21 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    command: |
+      sh -c "
+        echo 'Installing system dependencies...' &&
+        apk add --no-cache git openssh openssl &&
+        echo 'Cloning and building application...' &&
+        rm -rf /app && mkdir -p /app &&
+        git clone https://github.com/vicvasbob/bblist.git /app &&
+        cd /app &&
+        npm ci &&
+        npx prisma generate &&
+        npx prisma migrate deploy &&
+        npm run build &&
+        npm prune --production &&
+        npm start
+      "
 
 volumes:
   postgres_data:
