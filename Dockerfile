@@ -1,31 +1,26 @@
-# Usa la imagen oficial de Node.js (Debian)
-FROM node:20
+FROM node:20-alpine
 
-# Instala git para poder clonar el repositorio
-RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
+# Install system dependencies
+RUN apk add --no-cache openssl
 
-# Establece el directorio de trabajo
+# Set working directory
 WORKDIR /app
 
-# Clona el repositorio desde GitHub
-RUN git clone https://github.com/vicvasbob/bblist.git .
+# Copy package files
+COPY package*.json ./
 
-# Instala las dependencias
-RUN npm install
+# Install dependencies
+RUN npm ci
 
-# Genera el cliente de Prisma
+# Copy source code
+COPY . .
+
+# Generate Prisma client
 RUN npx prisma generate
 
-# Configuración de entorno
-ENV NEXT_PRIVATE_TURBOPACK=0
-ENV NODE_ENV=production
-
-# Compila la app Next.js en modo producción
-RUN npm run build
-
-# Inicia el servidor en modo producción
-CMD ["npm", "start"]
-
-# Expone el puerto por defecto de Next.js
+# Expose port
 EXPOSE 3000
+
+# Default command (can be overridden in docker-compose)
+CMD ["npm", "run", "dev"]
 

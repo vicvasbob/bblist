@@ -18,36 +18,29 @@ Sistema completo de gestión de listas de regalos para bebés con autenticación
 - Git (para desarrollo local)
 - Node.js 20+ (para desarrollo local)
 
-## 🐳 Despliegue con Docker (Recomendado)
+## 🐳 Despliegue con Docker
 
-### Opción 1: Desarrollo
+### Desarrollo Local
 ```bash
 # Clonar el repositorio
 git clone https://github.com/vicvasbob/bblist.git
 cd bblist
 
-# Iniciar los servicios
+# Copiar variables de entorno
+cp .env.example .env.local
+
+# Iniciar servicios de desarrollo
 docker-compose up -d
 ```
 
-### Opción 2: Producción (desde GitHub)
+### Servidor/Portainer
 ```bash
-# Descargar solo el docker-compose de producción
-curl -o docker-compose.yml https://raw.githubusercontent.com/vicvasbob/bblist/master/docker-compose.production.yml
+# Opción 1: Usar docker-compose.server.yml en Portainer
+# - Crear Stack desde Web Editor
+# - Copiar contenido de docker-compose.server.yml
 
-# Iniciar los servicios (esto clonará automáticamente desde GitHub)
-docker-compose up -d
-```
-
-### Opción 3: Solo el Dockerfile
-```bash
-# Construir desde GitHub directamente
-docker build -t baby-list https://github.com/vicvasbob/bblist.git
-
-# Ejecutar (necesitarás una base de datos PostgreSQL)
-docker run -p 3000:3000 \
-  -e DATABASE_URL="postgresql://user:pass@host:5432/db" \
-  baby-list
+# Opción 2: Desde terminal
+docker-compose -f docker-compose.server.yml up -d
 ```
 
 ## 🛠️ Desarrollo Local
