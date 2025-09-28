@@ -18,9 +18,12 @@ COPY . .
 # Generate Prisma client
 RUN npx prisma generate
 
+# Build Next.js application for production
+RUN npm run build
+
 # Expose port
 EXPOSE 3000
 
-# Default command (can be overridden in docker-compose)
-CMD ["npm", "run", "dev"]
+# Default command for production
+CMD ["npm", "start"]
 
