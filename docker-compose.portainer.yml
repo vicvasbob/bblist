@@ -35,19 +35,23 @@ services:
     restart: unless-stopped
     command: >
       sh -c "
-        echo '=== BABYLIST SIMPLE STARTUP ===' &&
+        echo '=== BABYLIST STARTUP ===' &&
         echo 'Node: $(node --version)' &&
         echo 'NPM: $(npm --version)' &&
-        echo 'Checking build status...' &&
         if [ ! -f .next/BUILD_ID ]; then
-          echo '� No build found, running build script...' &&
-          sh /app/simple-build.sh
-        else
-          echo '✅ Build exists, skipping build step'
+          echo '🔨 Building application...' &&
+          npm cache clean --force &&
+          npm install &&
+          npm list tailwindcss || echo 'TailwindCSS check failed' &&
+          npx prisma generate &&
+          NODE_ENV=production npm run build &&
+          if [ -f .next/BUILD_ID ]; then
+            echo '✅ Build successful'
+          else
+            echo '❌ Build failed' && exit 1
+          fi
         fi &&
-        echo '🗃️ Running database migrations...' &&
         npx prisma migrate deploy &&
-        echo '🚀 Starting production server...' &&
         npm start
       "
 
