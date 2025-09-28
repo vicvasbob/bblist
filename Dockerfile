@@ -10,11 +10,26 @@ WORKDIR /app
 COPY package*.json ./
 COPY prisma ./prisma
 
-# Install dependencies with verbose output
-RUN echo "Installing dependencies..." && \
-    npm ci --include=dev && \
-    echo "Verifying TailwindCSS installation..." && \
+# Install dependencies with robust connectivity handling
+RUN echo "Testing npm registry connectivity..." && \
+    npm config set registry https://registry.npmjs.org/ && \
+    npm config set timeout 300000 && \
+    npm config set fetch-timeout 300000 && \
+    npm config set fetch-retry-mintimeout 20000 && \
+    npm config set fetch-retry-maxtimeout 120000 && \
+    npm config set fetch-retries 5 && \
+    echo "Installing dependencies with retries..." && \
+    (npm ci --include=dev || \
+     (echo "First attempt failed, trying with different registry..." && \
+      npm config set registry https://registry.npm.taobao.org/ && \
+      npm ci --include=dev) || \
+     (echo "Second attempt failed, trying with original registry and force..." && \
+      npm config set registry https://registry.npmjs.org/ && \
+      npm install --include=dev --force)) && \
+    echo "Verifying critical dependencies..." && \
     npm list tailwindcss && \
+    npm list next && \
+    npm list react && \
     echo "Dependencies installed successfully"
 
 # Copy source code

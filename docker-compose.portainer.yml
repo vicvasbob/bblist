@@ -56,8 +56,18 @@ services:
         echo 'Ensuring build exists...' &&
         if [ ! -f .next/BUILD_ID ]; then
           echo '🔄 No valid build found, running build now...' &&
+          echo '📡 Testing npm connectivity...' &&
+          npm config set timeout 300000 &&
+          npm config set fetch-timeout 300000 &&
+          npm config set fetch-retries 5 &&
           echo 'Installing any missing dependencies (including dev deps)...' &&
-          npm install &&
+          (npm install || 
+           (echo 'Retrying with different registry...' && 
+            npm config set registry https://registry.npm.taobao.org/ && 
+            npm install) ||
+           (echo 'Final attempt with force install...' && 
+            npm config set registry https://registry.npmjs.org/ && 
+            npm install --force)) &&
           echo 'Generating Prisma client...' &&
           npx prisma generate &&
           echo 'Building Next.js application...' &&
