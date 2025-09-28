@@ -18,8 +18,13 @@ COPY . .
 # Generate Prisma client
 RUN npx prisma generate
 
-# Build Next.js application for production
-RUN npm run build
+# Build Next.js application for production with error checking
+RUN echo "Starting Next.js build..." && \
+    npm run build && \
+    echo "Build completed successfully" && \
+    ls -la .next/ && \
+    echo "Checking build ID..." && \
+    cat .next/BUILD_ID || echo "BUILD_ID not found!"
 
 # Expose port
 EXPOSE 3000

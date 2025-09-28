@@ -31,7 +31,19 @@ services:
     ports:
       - "3000:3000"
     restart: unless-stopped
-    command: sh -c "npx prisma migrate deploy && npm start"
+    command: |
+      sh -c "
+        echo 'Checking build...' &&
+        ls -la .next/ &&
+        if [ ! -f .next/BUILD_ID ]; then
+          echo 'No build found, running build...' &&
+          npm run build
+        fi &&
+        echo 'Running database migrations...' &&
+        npx prisma migrate deploy &&
+        echo 'Starting production server...' &&
+        npm start
+      "
 
 volumes:
   postgres_data:
