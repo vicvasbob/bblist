@@ -1,30 +1,38 @@
 FROM node:20-alpine
 
-# Install system dependencies
-RUN apk add --no-cache openssl
+# Install system dependencies including git for potential build processes
+RUN apk add --no-cache openssl git
 
 # Set working directory
 WORKDIR /app
 
-# Copy package files
+# Copy package files first for better Docker layer caching
 COPY package*.json ./
+COPY prisma ./prisma
 
-# Install dependencies
-RUN npm ci
+# Install dependencies with verbose output
+RUN echo "Installing dependencies..." && \
+    npm ci --verbose && \
+    echo "Dependencies installed successfully"
 
 # Copy source code
 COPY . .
 
-# Generate Prisma client
-RUN npx prisma generate
+# Generate Prisma client with error checking
+RUN echo "Generating Prisma client..." && \
+    npx prisma generate && \
+    echo "Prisma client generated successfully"
 
-# Build Next.js application for production with error checking
+# Build Next.js application with comprehensive error checking
 RUN echo "Starting Next.js build..." && \
-    npm run build && \
-    echo "Build completed successfully" && \
+    NODE_ENV=production npm run build && \
+    echo "Build completed, checking output..." && \
+    ls -la . && \
+    echo "Checking .next directory..." && \
     ls -la .next/ && \
-    echo "Checking build ID..." && \
-    cat .next/BUILD_ID || echo "BUILD_ID not found!"
+    echo "Verifying BUILD_ID..." && \
+    cat .next/BUILD_ID && \
+    echo "Build verification complete!"
 
 # Expose port
 EXPOSE 3000

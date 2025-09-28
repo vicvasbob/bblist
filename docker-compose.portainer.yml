@@ -33,12 +33,9 @@ services:
     restart: unless-stopped
     command: |
       sh -c "
-        echo 'Checking build...' &&
+        echo 'Container starting...' &&
+        echo 'Verifying build exists...' &&
         ls -la .next/ &&
-        if [ ! -f .next/BUILD_ID ]; then
-          echo 'No build found, running build...' &&
-          npm run build
-        fi &&
         echo 'Running database migrations...' &&
         npx prisma migrate deploy &&
         echo 'Starting production server...' &&
