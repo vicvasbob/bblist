@@ -57,7 +57,6 @@ services:
         if [ ! -f .next/BUILD_ID ]; then
           echo '🔄 No valid build found, running build now...' &&
           echo '📡 Testing npm connectivity...' &&
-          npm config set timeout 300000 &&
           npm config set fetch-timeout 300000 &&
           npm config set fetch-retries 5 &&
           echo 'Installing any missing dependencies (including dev deps)...' &&

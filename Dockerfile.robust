@@ -28,6 +28,10 @@ RUN echo "=== DEPENDENCY INSTALLATION ===" && \
     (curl -s --max-time 10 https://registry.npmjs.org/ > /dev/null && echo "✅ npm registry reachable") || echo "❌ npm registry not reachable" && \
     echo "Configuring npm for robust installation..." && \
     npm config set registry https://registry.npmjs.org/ && \
+    npm config set fetch-timeout 300000 && \
+    npm config set fetch-retry-mintimeout 20000 && \
+    npm config set fetch-retry-maxtimeout 120000 && \
+    npm config set fetch-retries 5 && \
     npm config list && \
     echo "Starting installation (attempt 1/3)..." && \
     (npm ci --include=dev && echo "✅ npm ci succeeded") || \
