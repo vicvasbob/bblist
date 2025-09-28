@@ -33,12 +33,39 @@ services:
     restart: unless-stopped
     command: |
       sh -c "
-        echo 'Container starting...' &&
-        echo 'Verifying build exists...' &&
-        ls -la .next/ &&
-        echo 'Running database migrations...' &&
+        echo '=== BABYLIST CONTAINER STARTING ===' &&
+        echo 'Node version:' && node --version &&
+        echo 'NPM version:' && npm --version &&
+        echo 'Working directory contents:' && ls -la &&
+        echo 'Checking if .next directory exists...' &&
+        if [ -d .next ]; then
+          echo '✅ .next directory found!' &&
+          ls -la .next/ &&
+          if [ -f .next/BUILD_ID ]; then
+            echo '✅ BUILD_ID found:' && cat .next/BUILD_ID
+          else
+            echo '❌ BUILD_ID missing, build incomplete'
+          fi
+        else
+          echo '❌ .next directory not found - build failed during image creation'
+        fi &&
+        echo 'Ensuring build exists...' &&
+        if [ ! -f .next/BUILD_ID ]; then
+          echo '🔄 No valid build found, running build now...' &&
+          echo 'Installing any missing dependencies...' &&
+          npm install &&
+          echo 'Generating Prisma client...' &&
+          npx prisma generate &&
+          echo 'Building Next.js application...' &&
+          NODE_ENV=production npm run build &&
+          echo '✅ Runtime build completed successfully!' &&
+          ls -la .next/
+        else
+          echo '✅ Valid build found, skipping build step'
+        fi &&
+        echo '🗃️  Running database migrations...' &&
         npx prisma migrate deploy &&
-        echo 'Starting production server...' &&
+        echo '🚀 Starting production server...' &&
         npm start
       "
 
