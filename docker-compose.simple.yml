@@ -1,0 +1,167 @@
+version: '3.8'version: '3.8'version: '3.8'
+
+
+
+services:
+
+  postgres:
+
+    image: postgres:15-alpineservices:services:
+
+    container_name: babylist-postgres
+
+    restart: unless-stopped  postgres:  postgres:
+
+    environment:
+
+      POSTGRES_DB: babylist    image: postgres:15-alpine    image: postgres:15-alpine
+
+      POSTGRES_USER: babyuser
+
+      POSTGRES_PASSWORD: babypass    container_name: babylist-postgres    container_name: babylist-postgres
+
+    volumes:
+
+      - postgres_data:/var/lib/postgresql/data    restart: unless-stopped    environment:
+
+    healthcheck:
+
+      test: ["CMD-SHELL", "pg_isready -U babyuser -d babylist"]    environment:      POSTGRES_DB: ${POSTGRES_DB:-babylist}
+
+      interval: 30s
+
+      timeout: 10s      POSTGRES_DB: babylist      POSTGRES_USER: ${POSTGRES_USER:-babyuser}
+
+      retries: 5
+
+      POSTGRES_USER: babyuser      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-babypass}
+
+  app:
+
+    build:       POSTGRES_PASSWORD: babypass    volumes:
+
+      context: .
+
+      no_cache: true    volumes:      - postgres_data:/var/lib/postgresql/data
+
+    container_name: babylist-app
+
+    depends_on:      - postgres_data:/var/lib/postgresql/data    restart: unless-stopped
+
+      postgres:
+
+        condition: service_healthy    healthcheck:    healthcheck:
+
+    environment:
+
+      DATABASE_URL: ${DATABASE_URL:-postgresql://babyuser:babypass@postgres:5432/babylist}      test: ["CMD-SHELL", "pg_isready -U babyuser -d babylist"]      test: ["CMD-SHELL", "pg_isready -U babyuser -d babylist"]
+
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://TU-DOMINIO}
+
+      GOOGLE_GEMINI_API_KEY: ${GOOGLE_GEMINI_API_KEY:-}      interval: 30s      interval: 30s
+
+      NODE_ENV: production
+
+    ports:      timeout: 10s      timeout: 10s
+
+      - "3000:3000"
+
+    restart: unless-stopped      retries: 5      retries: 5
+
+    command: >
+
+      sh -c "
+
+        echo '=== SIMPLE STARTUP ===' &&
+
+        if [ ! -f .next/BUILD_ID ]; then  app:  app:
+
+          echo 'Building...' &&
+
+          sh /app/simple-build.sh    build:     image: node:20-alpine
+
+        fi &&
+
+        npx prisma migrate deploy &&      context: .    container_name: babylist-app
+
+        npm start
+
+      "      no_cache: true    working_dir: /tmp/build
+
+
+
+volumes:    container_name: babylist-app    environment:
+
+  postgres_data:
+
+    driver: local    depends_on:      DATABASE_URL: ${DATABASE_URL:-postgresql://babyuser:babypass@postgres:5432/babylist}
+
+      postgres:      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3000}
+
+        condition: service_healthy      GOOGLE_GEMINI_API_KEY: ${GOOGLE_GEMINI_API_KEY:-}
+
+    environment:      NODE_ENV: production
+
+      DATABASE_URL: ${DATABASE_URL:-postgresql://babyuser:babypass@postgres:5432/babylist}    ports:
+
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://TU-DOMINIO}      - "3000:3000"
+
+      GOOGLE_GEMINI_API_KEY: ${GOOGLE_GEMINI_API_KEY:-}    depends_on:
+
+      NODE_ENV: production      postgres:
+
+    ports:        condition: service_healthy
+
+      - "3000:3000"    restart: unless-stopped
+
+    restart: unless-stopped    command: |
+
+    command: |      sh -c "
+
+      sh -c "        apk add --no-cache git openssh openssl &&
+
+        echo '=== BABYLIST SIMPLE STARTUP ===' &&        echo 'Preparing app directory...' &&
+
+        echo 'Node: $(node --version)' &&        rm -rf /app &&
+
+        echo 'NPM: $(npm --version)' &&        mkdir -p /app &&
+
+        if [ ! -f .next/BUILD_ID ]; then        echo 'Cloning repository fresh...' &&
+
+          echo '🔨 Building application...' &&        git clone https://github.com/vicvasbob/bblist.git /app &&
+
+          sh /app/simple-build.sh        cd /app &&
+
+        else        echo 'Installing ALL npm dependencies (including dev for build)...' &&
+
+          echo '✅ Build exists, skipping build step'        echo 'Current package.json dependencies:' &&
+
+        fi &&        cat package.json | grep -A 20 '"dependencies"' &&
+
+        echo '🗃️  Running database migrations...' &&        npm install ||
+
+        npx prisma migrate deploy &&        (echo 'npm install failed, trying npm ci...' && npm ci) ||
+
+        echo '🚀 Starting server...' &&        (echo 'Both install methods failed, removing lock and installing...' && 
+
+        npm start         rm -f package-lock.json && npm install) &&
+
+      "        echo 'Verifying TailwindCSS installation:' &&
+
+        npm list tailwindcss || echo 'TailwindCSS not found!' &&
+
+volumes:        npx prisma generate &&
+
+  postgres_data:        npx prisma migrate deploy &&
+
+    driver: local        npm run build &&
+        npm start
+      "
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  default:
+    driver: bridge

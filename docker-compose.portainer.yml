@@ -20,8 +20,6 @@ services:
   app:
     build: 
       context: .
-      args:
-        - BUILDKIT_INLINE_CACHE=0
       no_cache: true
     container_name: babylist-app
     depends_on:
@@ -35,48 +33,19 @@ services:
     ports:
       - "3000:3000"
     restart: unless-stopped
-    command: |
+    command: >
       sh -c "
-        echo '=== BABYLIST CONTAINER STARTING ===' &&
-        echo 'Node version:' && node --version &&
-        echo 'NPM version:' && npm --version &&
-        echo 'Working directory contents:' && ls -la &&
-        echo 'Checking if .next directory exists...' &&
-        if [ -d .next ]; then
-          echo '✅ .next directory found!' &&
-          ls -la .next/ &&
-          if [ -f .next/BUILD_ID ]; then
-            echo '✅ BUILD_ID found:' && cat .next/BUILD_ID
-          else
-            echo '❌ BUILD_ID missing, build incomplete'
-          fi
-        else
-          echo '❌ .next directory not found - build failed during image creation'
-        fi &&
-        echo 'Ensuring build exists...' &&
+        echo '=== BABYLIST SIMPLE STARTUP ===' &&
+        echo 'Node: $(node --version)' &&
+        echo 'NPM: $(npm --version)' &&
+        echo 'Checking build status...' &&
         if [ ! -f .next/BUILD_ID ]; then
-          echo '🔄 No valid build found, running build now...' &&
-          echo '📡 Testing npm connectivity...' &&
-          npm config set fetch-timeout 300000 &&
-          npm config set fetch-retries 5 &&
-          echo 'Installing any missing dependencies (including dev deps)...' &&
-          (npm install || 
-           (echo 'Retrying with different registry...' && 
-            npm config set registry https://registry.npm.taobao.org/ && 
-            npm install) ||
-           (echo 'Final attempt with force install...' && 
-            npm config set registry https://registry.npmjs.org/ && 
-            npm install --force)) &&
-          echo 'Generating Prisma client...' &&
-          npx prisma generate &&
-          echo 'Building Next.js application...' &&
-          NODE_ENV=production npm run build &&
-          echo '✅ Runtime build completed successfully!' &&
-          ls -la .next/
+          echo '� No build found, running build script...' &&
+          sh /app/simple-build.sh
         else
-          echo '✅ Valid build found, skipping build step'
+          echo '✅ Build exists, skipping build step'
         fi &&
-        echo '🗃️  Running database migrations...' &&
+        echo '🗃️ Running database migrations...' &&
         npx prisma migrate deploy &&
         echo '🚀 Starting production server...' &&
         npm start
