@@ -13,6 +13,8 @@ COPY prisma ./prisma
 # Install dependencies with verbose output
 RUN echo "Installing dependencies..." && \
     npm ci --include=dev && \
+    echo "Verifying TailwindCSS installation..." && \
+    npm list tailwindcss && \
     echo "Dependencies installed successfully"
 
 # Copy source code
