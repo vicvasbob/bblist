@@ -52,7 +52,7 @@ services:
         echo 'Ensuring build exists...' &&
         if [ ! -f .next/BUILD_ID ]; then
           echo '🔄 No valid build found, running build now...' &&
-          echo 'Installing any missing dependencies...' &&
+          echo 'Installing any missing dependencies (including dev deps)...' &&
           npm install &&
           echo 'Generating Prisma client...' &&
           npx prisma generate &&

@@ -12,7 +12,7 @@ COPY prisma ./prisma
 
 # Install dependencies with verbose output
 RUN echo "Installing dependencies..." && \
-    npm ci && \
+    npm ci --include=dev && \
     echo "Dependencies installed successfully"
 
 # Copy source code
